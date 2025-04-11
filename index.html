@@ -31,9 +31,10 @@
     <audio id="radioPlayer" src="https://radiostream01.radio.uni-leipzig.de/mephisto976_livestream.mp3"></audio>
     
     <div class="flex justify-center items-center gap-4 mb-4">
-      <button id="playPauseBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-xl transition-all">
-        ▶️ Play
-      </button>
+     <button id="playPauseBtn" class="bg-transparent border-none p-0">
+  	<img id="playPauseIcon" src="button_play.png" alt="Play" class="w-8 h-8">
+     </button>
+
     </div>
 
     <div class="flex flex-col gap-2">
@@ -46,20 +47,24 @@
   <script>
     const radio = document.getElementById('radioPlayer');
     const playPauseBtn = document.getElementById('playPauseBtn');
+const playPauseIcon = document.getElementById('playPauseIcon');
     const volumeSlider = document.getElementById('volumeSlider');
 
     let isPlaying = false;
 
-    playPauseBtn.addEventListener('click', () => {
-      if (isPlaying) {
-        radio.pause();
-        playPauseBtn.textContent = '▶️ Play';
-      } else {
-        radio.play();
-        playPauseBtn.textContent = '⏸ Pause';
-      }
-      isPlaying = !isPlaying;
-    });
+
+playPauseBtn.addEventListener('click', () => {
+  if (isPlaying) {
+    radio.pause();
+    playPauseIcon.src = 'button_play.png';  // Setzt das Play-Icon
+  } else {
+    loadingBarContainer.style.display = 'block';  // Ladebalken anzeigen
+    radio.play();
+    playPauseIcon.src = 'button_pause.png';  // Setzt das Pause-Icon
+  }
+  isPlaying = !isPlaying;
+});
+	  
 
     volumeSlider.addEventListener('input', () => {
       radio.volume = volumeSlider.value;
