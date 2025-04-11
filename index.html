@@ -17,6 +17,17 @@
     animation: loading-bar 1s linear infinite;
     width: 100%;
   }
+  
+    #volumeSlider::-webkit-slider-thumb {
+      appearance: none;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background-color: #d4e1f4;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+  
 	</style>
 
 </head>
@@ -31,7 +42,7 @@
     
     <div class="flex justify-center items-center gap-4 mb-4">
       <button id="playPauseBtn" class="bg-transparent border-none p-0">
-        <img id="playPauseIcon" src="button_play.png" alt="Play" class="w-8 h-8">
+        <img id="playPauseIcon" src="button_play.png" alt="Play" class="w-15 h-15">
       </button>
     </div>
 
