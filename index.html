@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mephisto 97.6 Livestream</title>
+  <link rel="icon" href="mephistologo.png" type="image/png">
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <style>
+  @keyframes loading-bar {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+
+  .animate-loading-bar {
+    animation: loading-bar 1s linear infinite;
+    width: 100%;
+  }
+	</style>
+
+  
+</head>
+<body class="bg-gray-900 text-white flex items-center justify-center h-screen">
+
+  <div class="bg-gray-800 p-6 rounded-2xl shadow-lg max-w-sm w-full">
+    <div class="flex justify-center mb-4">
+  		<img src="mephistologo.png" alt="Logo mephisto 97.6" class="h-40 object-contain">
+	</div>
+    
+    <audio id="radioPlayer" src="https://radiostream01.radio.uni-leipzig.de/mephisto976_livestream.mp3"></audio>
+    
+    <div class="flex justify-center items-center gap-4 mb-4">
+      <button id="playPauseBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-xl transition-all">
+        ▶️ Play
+      </button>
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <label for="volumeSlider" class="text-sm">🔊 Lautstärke</label>
+      <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="1" 
+             class="w-full appearance-none h-2 bg-gray-700 rounded-full outline-none cursor-pointer">
+    </div>
+  </div>
+
+  <script>
+    const radio = document.getElementById('radioPlayer');
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const volumeSlider = document.getElementById('volumeSlider');
+
+    let isPlaying = false;
+
+    playPauseBtn.addEventListener('click', () => {
+      if (isPlaying) {
+        radio.pause();
+        playPauseBtn.textContent = '▶️ Play';
+      } else {
+        radio.play();
+        playPauseBtn.textContent = '⏸ Pause';
+      }
+      isPlaying = !isPlaying;
+    });
+
+    volumeSlider.addEventListener('input', () => {
+      radio.volume = volumeSlider.value;
+    });
+  </script>
+
+</body>
+</html>
