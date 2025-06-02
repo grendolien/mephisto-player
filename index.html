@@ -55,8 +55,8 @@
   border: none;
   cursor: pointer;
   padding: 0;
-  width: 40px;
-  height: 40px;
+  width: 60px;
+  height: ¥0px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -180,86 +180,84 @@
   const liveIcon = document.getElementById('liveIcon');
   const liveStreamUrl = 'https://radiostream01.radio.uni-leipzig.de/mephisto976_livestream.mp3';
 
-  let totalPauseDuration = 0;
   let playClickCount = 0;
-  let lastPauseTime = null;
-  const MAX_LIVE_DELAY = 10 * 1000; // 10 Sekunden in Millisekunden
+  let cumulativePause = 0;
+  let pausedTimestamp = null;
+  const MAX_LIVE_DELAY = 10; // Sekunden
 
   function updateLiveIcon() {
-    const now = Date.now();
-
-    // Wenn aktuell pausiert, berücksichtige laufende Pausezeit
-    let effectiveDelay = totalPauseDuration;
-    if (audio.paused && lastPauseTime) {
-      effectiveDelay += now - lastPauseTime;
+    let delay = cumulativePause;
+    if (pausedTimestamp) {
+      delay += (Date.now() - pausedTimestamp) / 1000;
     }
 
-    const isLive = effectiveDelay <= MAX_LIVE_DELAY;
+    const isLive = delay <= MAX_LIVE_DELAY;
     liveIcon.src = isLive ? 'icon_live_active.png' : 'icon_live_inactive.png';
   }
 
-playBtn.addEventListener('click', () => {
-  playClickCount++;
+  playBtn.addEventListener('click', () => {
+    playClickCount++;
 
-  // Erstes Mal Play drücken → Stream laden, entmuten, neu starten
-  if (playClickCount === 1) {
-    audio.src = liveStreamUrl;
-    audio.muted = false;
-    cumulativePause = 0;
-    pausedTimestamp = null;
-    audio.play();
-    updateMuteIcon();
-    updateLiveIcon();
-    return;
-  }
-
-  // Danach normales Play/Pause Verhalten
-  if (audio.muted && !audio.paused) {
-    audio.muted = false;
-    updateMuteIcon();
-    return;
-  }
-
-  if (audio.paused) {
-    audio.play();
-    if (pausedTimestamp) {
-      cumulativePause += (Date.now() - pausedTimestamp) / 1000;
+    if (playClickCount === 1) {
+      // Erstes Play: Stream laden
+      audio.src = liveStreamUrl;
+      audio.muted = false;
+      cumulativePause = 0;
       pausedTimestamp = null;
+      audio.play();
+      updateMuteIcon();
+      updateLiveIcon();
+      return;
     }
-  } else {
-    audio.pause();
-    pausedTimestamp = Date.now();
-  }
-});
+
+    if (audio.muted && !audio.paused) {
+      audio.muted = false;
+      updateMuteIcon();
+      return;
+    }
+
+    if (audio.paused) {
+      audio.play();
+      if (pausedTimestamp) {
+        cumulativePause += (Date.now() - pausedTimestamp) / 1000;
+        pausedTimestamp = null;
+      }
+    } else {
+      audio.pause();
+      pausedTimestamp = Date.now();
+    }
+  });
 
   liveBtn.addEventListener('click', () => {
     audio.src = liveStreamUrl;
     audio.play();
-    totalPauseDuration = 0;
-    lastPauseTime = null;
+    audio.muted = false;
+    cumulativePause = 0;
+    pausedTimestamp = null;
     updateLiveIcon();
+    updateMuteIcon();
   });
 
   volumeSlider.addEventListener('input', () => {
     audio.volume = volumeSlider.value;
     if (audio.volume > 0) {
       audio.muted = false;
-      muteIcon.src = 'icon_volume.png';
+      updateMuteIcon();
     }
   });
 
   muteIcon.addEventListener('click', () => {
     audio.muted = !audio.muted;
-    if (audio.muted) {
-      muteIcon.src = 'icon_muted.png';
-      volumeSlider.value = 0;
-      audio.volume = 0;
-    } else {
-      muteIcon.src = 'icon_volume.png';
+    updateMuteIcon();
+    if (!audio.muted && volumeSlider.value === "0") {
       volumeSlider.value = 0.6;
       audio.volume = 0.6;
     }
   });
+
+  function updateMuteIcon() {
+    muteIcon.src = audio.muted ? 'icon_muted.png' : 'icon_volume.png';
+  }
 
   audio.addEventListener('play', () => {
     playBtn.classList.add('playing');
@@ -270,6 +268,7 @@ playBtn.addEventListener('click', () => {
   audio.addEventListener('pause', () => {
     playBtn.classList.remove('playing');
     document.getElementById('playIcon').src = 'icon_play.png';
+    pausedTimestamp = Date.now();
     updateLiveIcon();
   });
 
@@ -288,8 +287,8 @@ playBtn.addEventListener('click', () => {
   audio.addEventListener('ended', updateLiveIcon);
   audio.addEventListener('loadeddata', updateLiveIcon);
 
-  // Alle 1 Sekunde prüfen, ob live-Anzeige noch korrekt ist (z.B. während Pause)
-  setInterval(updateLiveIcon, 1000);
+  // Live-Status regelmäßig prüfen
+  setInterval(updateLiveIcon, 500);
 
   function updateCurrentShow() {
     const now = new Date();
@@ -331,3 +330,4 @@ playBtn.addEventListener('click', () => {
 
 </body>
 </html>
+
