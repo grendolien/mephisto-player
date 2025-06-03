@@ -56,20 +56,20 @@
   cursor: pointer;
   padding: 0;
   width: 60px;
-  height: ¥0px;
+  height: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .live-button img {
-  width: 40px;
-  height: 40px;
+  width: 50px;
+  height: 50px;
   pointer-events: none;
 }
 
  
-     .slider-container {
+      .slider-container {
       background-color: #d4d7e1;
       border-radius: 30px;
       padding: 0.5rem 1rem;
@@ -79,9 +79,9 @@
       gap: 0.5rem;
     }
 
-    #muteIcon {
-      width: 24px;
-      height: 24px;
+   #muteIcon {
+      width: 17px;
+      height: 17px;
       cursor: pointer;
     }
 
@@ -103,6 +103,27 @@
   display: inline; /* Titel in einer Linie mit "Jetzt:" */
     font-size: 1.0rem;
 }
+
+.mute-button {
+  background-color: #d4d7e1;
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.mute-button img {
+  width: 10px;
+  height: 10px;
+  pointer-events: none;
+}
+
+
 
 #title {
   font-weight: bold;
@@ -152,10 +173,9 @@
       <button class="live-button" id="liveBtn">
         <img id="liveIcon" src="icon_live_inactive.png" alt="Live" />
     </button>
-      <div class="slider-container">
+    <button class="mute-button" id="muteBtn">
         <img id="muteIcon" src="icon_volume.png" alt="Lautstärke" />
-        <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.6" />
-      </div>
+    </button>
     </div>
 
     <div class="text-wrapper">
@@ -174,7 +194,6 @@
   const apiKey = 'befa0aac8038a98c0542e7b2ad56a4fea7e9b4c00b22777a79b7a58de04bdc1f';
   const audio = document.getElementById('audio');
   const playBtn = document.getElementById('playBtn');
-  const volumeSlider = document.getElementById('volumeSlider');
   const muteIcon = document.getElementById('muteIcon');
   const liveBtn = document.getElementById('liveBtn');
   const liveIcon = document.getElementById('liveIcon');
@@ -196,37 +215,33 @@
   }
 
   playBtn.addEventListener('click', () => {
-    playClickCount++;
+  playClickCount++;
 
-    if (playClickCount === 1) {
-      // Erstes Play: Stream laden
-      audio.src = liveStreamUrl;
-      audio.muted = false;
-      cumulativePause = 0;
+  if (playClickCount === 1) {
+    // Erstes Play: Stream laden
+    audio.src = liveStreamUrl;
+    audio.muted = false;
+    cumulativePause = 0;
+    pausedTimestamp = null;
+    audio.play();
+    updateMuteIcon();
+    updateLiveIcon();
+    return;
+  }
+
+  if (audio.paused) {
+    // Wenn pausiert → abspielen
+    audio.play();
+    if (pausedTimestamp) {
+      cumulativePause += (Date.now() - pausedTimestamp) / 1000;
       pausedTimestamp = null;
-      audio.play();
-      updateMuteIcon();
-      updateLiveIcon();
-      return;
     }
-
-    if (audio.muted && !audio.paused) {
-      audio.muted = false;
-      updateMuteIcon();
-      return;
-    }
-
-    if (audio.paused) {
-      audio.play();
-      if (pausedTimestamp) {
-        cumulativePause += (Date.now() - pausedTimestamp) / 1000;
-        pausedTimestamp = null;
-      }
-    } else {
-      audio.pause();
-      pausedTimestamp = Date.now();
-    }
-  });
+  } else {
+    // Wenn nicht pausiert → pausieren
+    audio.pause();
+    pausedTimestamp = Date.now();
+  }
+});
 
   liveBtn.addEventListener('click', () => {
     audio.src = liveStreamUrl;
@@ -238,26 +253,16 @@
     updateMuteIcon();
   });
 
-  volumeSlider.addEventListener('input', () => {
-    audio.volume = volumeSlider.value;
-    if (audio.volume > 0) {
-      audio.muted = false;
-      updateMuteIcon();
-    }
-  });
+muteBtn.addEventListener('click', () => {
+  audio.muted = !audio.muted;
+  updateMuteIcon();
+});
 
-  muteIcon.addEventListener('click', () => {
-    audio.muted = !audio.muted;
-    updateMuteIcon();
-    if (!audio.muted && volumeSlider.value === "0") {
-      volumeSlider.value = 0.6;
-      audio.volume = 0.6;
-    }
-  });
 
-  function updateMuteIcon() {
-    muteIcon.src = audio.muted ? 'icon_muted.png' : 'icon_volume.png';
-  }
+function updateMuteIcon() {
+  muteIcon.src = audio.muted ? 'icon_muted.png' : 'icon_volume.png';
+}
+
 
   audio.addEventListener('play', () => {
     playBtn.classList.add('playing');
@@ -330,4 +335,3 @@
 
 </body>
 </html>
-
